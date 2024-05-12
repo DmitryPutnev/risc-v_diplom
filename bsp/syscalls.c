@@ -42,9 +42,61 @@ void __attribute__((noreturn)) tohost_exit(uintptr_t code)
   while (1);
 }
 
+uintptr_t __attribute__((weak)) timer_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+  printf("Timer interrupt\n");
+  tohost_exit(1);
+}
+
+uintptr_t __attribute__((weak)) ecall_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+  printf("Software interrupt\n");
+  tohost_exit(1);
+}
+
 uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uintptr_t regs[32])
 {
-  tohost_exit(1337);
+  int64_t interrupt;
+  asm volatile ("csrr t0, mcause\n"
+  		"srli %0, t0, 63\n"
+  		:"=r" (interrupt)
+  );
+  
+  if (interrupt) {
+    switch ((int)cause) {
+    	case 1:
+    	case 3:
+    		return ecall_handler(cause, epc, regs);
+    	case 5: 
+    	case 7:
+    		return timer_handler(cause, epc, regs);
+    	case 9:
+    	case 11:
+    		tohost_exit(1);
+    	case 13:
+    		tohost_exit(1);
+    	default: printf("Interrupt cause = %d\n", cause); tohost_exit(1);
+    }
+  
+  } else {
+    switch ((int)cause) {
+    	case 0: printf("Instruction address misaligned\n"); tohost_exit(1);
+    	case 1: printf("Instruction access fault\n"); tohost_exit(1);
+    	case 2: printf("Illegal instruction\n"); tohost_exit(1);
+    	case 3: printf("Breakpoint\n"); tohost_exit(1);
+    	case 4: printf("Load address misaligned\n"); tohost_exit(1);
+    	case 5: printf("Load access fault\n"); tohost_exit(1);
+    	case 6: printf("Store/AMO address misaligned\n"); tohost_exit(1);
+    	case 7: printf("Store/AMO access fault\n"); tohost_exit(1);
+    	case 8: printf("Environment call from U-mode\n"); tohost_exit(1);
+    	case 9: printf("Environment call from S-mode\n"); tohost_exit(1);
+    	case 11: printf("Environment call from M-mode\n"); tohost_exit(1);
+    	case 12: printf("Instruction page fault\n"); tohost_exit(1);
+    	case 13: printf("Load page fault\n"); tohost_exit(1);
+    	case 15: printf("Store/AMO page fault\n"); tohost_exit(1);
+    	case 18: printf("Software check\n"); tohost_exit(1);
+    	case 19: printf("Hardware error\n"); tohost_exit(1);
+    	default: printf("Except cause = %d\n", cause); tohost_exit(1);
+    }
+  }
 }
 
 void exit(int code)

@@ -1,12 +1,13 @@
 .PHONY: clean, dump
 
-TARGET = sum
+TARGET = sw-interrupt
 
 PREFIX = ./../..
 
 SRC = $(wildcard $(PREFIX)/bsp/*.c)\
 	$(wildcard $(PREFIX)/bsp/*.S)\
 	$(wildcard ./*.c)\
+	$(wildcard $(PREFIX)/lib/software_interrupt/*.c)\
 
 OBJ = $(addsuffix .o, $(basename $(notdir $(SRC))))
 
