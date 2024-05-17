@@ -1,5 +1,5 @@
 #include "software_interrupt_lib.h"
-#include "/home/dmitry/Документы/riscv-programm-diplom/bsp/encoding.h"
+#include "../../bsp/encoding.h"
 
 void enable_software_interrupt() {
 	asm volatile (

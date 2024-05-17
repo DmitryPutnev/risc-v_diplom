@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <limits.h>
 #include <sys/signal.h>
-
-#define SYS_write 64
+#include "sys_lib.h"
+#include "../../lib/timer/timer_lib.h"
 
 #undef strcmp
 
@@ -47,8 +47,21 @@ uintptr_t __attribute__((weak)) timer_handler(uintptr_t cause, uintptr_t epc, ui
   tohost_exit(1);
 }
 
-uintptr_t __attribute__((weak)) ecall_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+uintptr_t __attribute__((weak)) sw_interrupt_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
   printf("Software interrupt\n");
+  tohost_exit(1);
+}
+
+uintptr_t __attribute__((weak)) ecall_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+  switch ((int)regs[17]) {
+  	case SYS_start_timer:
+  		init_timer(regs[10]);
+  		enable_timer_interrupt();
+
+  		return epc+4;
+  		
+  }
+  
   tohost_exit(1);
 }
 
@@ -64,7 +77,7 @@ uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uint
     switch ((int)cause) {
     	case 1:
     	case 3:
-    		return ecall_handler(cause, epc, regs);
+    		return sw_interrupt_handler(cause, epc, regs);
     	case 5: 
     	case 7:
     		return timer_handler(cause, epc, regs);
@@ -86,14 +99,17 @@ uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uint
     	case 5: printf("Load access fault\n"); tohost_exit(1);
     	case 6: printf("Store/AMO address misaligned\n"); tohost_exit(1);
     	case 7: printf("Store/AMO access fault\n"); tohost_exit(1);
-    	case 8: printf("Environment call from U-mode\n"); tohost_exit(1);
-    	case 9: printf("Environment call from S-mode\n"); tohost_exit(1);
-    	case 11: printf("Environment call from M-mode\n"); tohost_exit(1);
     	case 12: printf("Instruction page fault\n"); tohost_exit(1);
     	case 13: printf("Load page fault\n"); tohost_exit(1);
     	case 15: printf("Store/AMO page fault\n"); tohost_exit(1);
     	case 18: printf("Software check\n"); tohost_exit(1);
     	case 19: printf("Hardware error\n"); tohost_exit(1);
+    	
+    	case 8:
+    	case 9:
+    	case 11:
+    		return ecall_handler(cause, epc, regs);
+    	
     	default: printf("Except cause = %d\n", cause); tohost_exit(1);
     }
   }
@@ -138,11 +154,8 @@ static void init_tls()
   memset(thread_pointer + tdata_size, 0, tbss_size);
 }
 
-void _init(int cid, int nc)
-{
-  init_tls();
-  thread_entry(cid, nc);
-
+void enter_main() 
+{  
   // only single-threaded programs should ever get here.
   int ret = main(0, 0);
 
@@ -155,6 +168,21 @@ void _init(int cid, int nc)
     printstr(buf);
 
   exit(ret);
+}
+
+void _init(int cid, int nc)
+{
+  init_tls();
+  thread_entry(cid, nc);
+
+  // machine to user
+  asm volatile (
+  	"csrw mepc, %0\n"
+  	"mret\n"
+  	:: "r" (enter_main)
+  );
+  
+  enter_main();
 }
 
 #undef putchar

@@ -1,5 +1,5 @@
 #include "timer_lib.h"
-#include "/home/dmitry/Документы/riscv-programm-diplom/bsp/encoding.h"
+#include "../../bsp/encoding.h"
 
 void init_timer(int time) {
 	asm volatile (
@@ -21,7 +21,13 @@ void enable_timer_interrupt() {
 		"csrw mstatus, t0\n"
 		"mv t0, %1\n"
 		"csrw mie, t0\n"
-		:: "r" (MSTATUS_MIE), "r" (1 << 7)
+		"mv t0, %2\n"
+		"csrw mip, t0\n"
+		"mv t0, %3\n"
+		"csrw mideleg, t0\n"
+		"mv t0, %4\n"
+		"csrw medeleg, t0\n"
+		:: "r" (MSTATUS_MIE + MSTATUS_SIE + MSTATUS_UIE), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5))
 	);
 }
 

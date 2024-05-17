@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "../../bsp/encoding.h"
 #include "../../lib/timer/timer_lib.h"
+#include "../../bsp/user/sys_lib.h"
 
 int a = 0;
 int b = 5;
@@ -13,18 +13,12 @@ uintptr_t timer_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
 	a++;
 	
 	reset_timer();
-	
 	return epc;
 }
 
 
 int main() {
-	// Установка периода прерывания таймера
-	init_timer(0x18000);
-
-	// Включение прерываний таймера
-	enable_timer_interrupt();
-
+	set_timer(0X18000);
 	
 	// Бесконечный цикл
 	while (a < b) {
