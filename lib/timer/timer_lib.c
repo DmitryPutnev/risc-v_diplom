@@ -23,11 +23,7 @@ void enable_timer_interrupt() {
 		"csrw mie, t0\n"
 		"mv t0, %2\n"
 		"csrw mip, t0\n"
-		"mv t0, %3\n"
-		"csrw mideleg, t0\n"
-		"mv t0, %4\n"
-		"csrw medeleg, t0\n"
-		:: "r" (MSTATUS_MIE + MSTATUS_SIE + MSTATUS_UIE), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5)), "r" ((1 << 7) + (1 << 5))
+		:: "r" (MSTATUS_MIE), "r" (1 << 7), "r" (1 << 7)
 	);
 }
 
