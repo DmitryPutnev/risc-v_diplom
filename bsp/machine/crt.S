@@ -132,6 +132,10 @@ _start:
   add sp, sp, tp
   sll a2, a0, STKSHIFT
   add tp, tp, a2
+  
+  csrr t0, mstatus
+  add t0, t0, MSTATUS_MIE
+  csrw mstatus, t0
 
   j _init
 

@@ -1,6 +1,6 @@
 .PHONY: clean, dump
 
-TARGET = ecall
+TARGET = ecall_timer
 PRIV_LVL = user
 
 PREFIX = ./../..
@@ -8,7 +8,7 @@ PREFIX = ./../..
 SRC = $(wildcard $(PREFIX)/bsp/$(PRIV_LVL)/*.c)\
 	$(wildcard $(PREFIX)/bsp/$(PRIV_LVL)/*.S)\
 	$(wildcard ./*.c)\
-	$(wildcard $(PREFIX)/lib/*/*.c)\
+	$(wildcard $(PREFIX)/lib/*.c)\
 
 OBJ = $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
 

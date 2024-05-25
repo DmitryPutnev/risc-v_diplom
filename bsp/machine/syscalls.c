@@ -9,6 +9,32 @@
 
 #define SYS_write 64
 
+#define SW_INTERRUPT_S 1
+#define SW_INTERRUPT_M 3
+#define TIMER_INTERRUPT_S 5
+#define TIMER_INTERRUPT_M 7
+#define EXTERNAL_INTERRUPT_S 9
+#define EXTERNAL_INTERRUPT_M 11
+#define COUNTER_OVERFLOW_INTERRUPT 13
+
+#define INST_ADDR_MISALIGNED 0
+#define INST_ACCESS_FAULT 1
+#define ILLEGAL_INST 2
+#define BREAKPOINT 3
+#define LOAD_ADDR_MISALIGNED 4
+#define LOAD_ACCESS_FAULT 5
+#define STORE_ADDR_MISALIGNED 6
+#define STORE_ACCESS_FAULT 7
+#define INST_PAGE_FAULT 12
+#define LOAD_PAGE_FAULT 13
+#define STORE_PAGE_FAULT 15
+#define SOFTWARE_CHECK 18
+#define HARDWARE_ERROR 19
+
+#define ECALL_U 8
+#define ECALL_S 9
+#define ECALL_M 11
+
 #undef strcmp
 
 extern volatile uint64_t tohost;
@@ -42,12 +68,17 @@ void __attribute__((noreturn)) tohost_exit(uintptr_t code)
   while (1);
 }
 
-uintptr_t __attribute__((weak)) timer_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+void __attribute__((weak)) timer_handler() {
   printf("Timer interrupt\n");
   tohost_exit(1);
 }
 
-uintptr_t __attribute__((weak)) sw_interrupt_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
+void __attribute__((weak)) external_interrupt_handler() {
+  printf("External_interrupt\n");
+  tohost_exit(1);
+}
+
+void __attribute__((weak)) sw_interrupt_handler() {
   printf("Software interrupt\n");
   tohost_exit(1);
 }
@@ -62,40 +93,42 @@ uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uint
   
   if (interrupt) {
     switch ((int)cause) {
-    	case 1:
-    	case 3:
-    		return sw_interrupt_handler(cause, epc, regs);
-    	case 5: 
-    	case 7:
-    		return timer_handler(cause, epc, regs);
-    	case 9:
-    	case 11:
-    		tohost_exit(1);
-    	case 13:
-    		tohost_exit(1);
+    	case SW_INTERRUPT_S:
+    	case SW_INTERRUPT_M:
+    		sw_interrupt_handler(); break;
+    	case TIMER_INTERRUPT_S: 
+    	case TIMER_INTERRUPT_M:
+    		timer_handler(); break;
+    	case EXTERNAL_INTERRUPT_S:
+    	case EXTERNAL_INTERRUPT_M:
+    		external_interrupt_handler(); break;
+    	case COUNTER_OVERFLOW_INTERRUPT:
+    		tohost_exit(1); break;
     	default: printf("Interrupt cause = %d\n", cause); tohost_exit(1);
     }
+    return epc;
   
   } else {
     switch ((int)cause) {
-    	case 0: printf("Instruction address misaligned\n"); tohost_exit(1);
-    	case 1: printf("Instruction access fault\n"); tohost_exit(1);
-    	case 2: printf("Illegal instruction\n"); tohost_exit(1);
-    	case 3: printf("Breakpoint\n"); tohost_exit(1);
-    	case 4: printf("Load address misaligned\n"); tohost_exit(1);
-    	case 5: printf("Load access fault\n"); tohost_exit(1);
-    	case 6: printf("Store/AMO address misaligned\n"); tohost_exit(1);
-    	case 7: printf("Store/AMO access fault\n"); tohost_exit(1);
-    	case 8: printf("Environment call from U-mode\n"); tohost_exit(1);
-    	case 9: printf("Environment call from S-mode\n"); tohost_exit(1);
-    	case 11: printf("Environment call from M-mode\n"); tohost_exit(1);
-    	case 12: printf("Instruction page fault\n"); tohost_exit(1);
-    	case 13: printf("Load page fault\n"); tohost_exit(1);
-    	case 15: printf("Store/AMO page fault\n"); tohost_exit(1);
-    	case 18: printf("Software check\n"); tohost_exit(1);
-    	case 19: printf("Hardware error\n"); tohost_exit(1);
-    	default: printf("Except cause = %d\n", cause); tohost_exit(1);
+    	case INST_ADDR_MISALIGNED: printf("Instruction address misaligned\n"); break;
+    	case INST_ACCESS_FAULT: printf("Instruction access fault\n"); break;
+    	case ILLEGAL_INST: printf("Illegal instruction\n"); break;
+    	case BREAKPOINT: printf("Breakpoint\n"); break;
+    	case LOAD_ADDR_MISALIGNED: printf("Load address misaligned\n"); break;
+    	case LOAD_ACCESS_FAULT: printf("Load access fault\n"); break;
+    	case STORE_ADDR_MISALIGNED: printf("Store/AMO address misaligned\n"); break;
+    	case STORE_ACCESS_FAULT: printf("Store/AMO access fault\n"); break;
+    	case ECALL_U: printf("Environment call from U-mode\n"); break;
+    	case ECALL_S: printf("Environment call from S-mode\n"); break;
+    	case ECALL_M: printf("Environment call from M-mode\n"); break;
+    	case INST_PAGE_FAULT: printf("Instruction page fault\n"); break;
+    	case LOAD_PAGE_FAULT: printf("Load page fault\n"); break;
+    	case STORE_PAGE_FAULT: printf("Store/AMO page fault\n"); break;
+    	case SOFTWARE_CHECK: printf("Software check\n"); break;
+    	case HARDWARE_ERROR: printf("Hardware error\n"); break;
+    	default: printf("Except cause = %d\n", cause);
     }
+    tohost_exit(1);
   }
 }
 
@@ -125,7 +158,7 @@ int __attribute__((weak)) main(int argc, char** argv)
 {
   // single-threaded programs override this function.
   printstr("Implement main(), foo!\n");
-  return -1;
+  return 1;
 }
 
 static void init_tls()

@@ -6,7 +6,9 @@
 
 void init_timer(int time);
 
-void enable_timer_interrupt();
+void disable_timer();
+
+void enable_timer();
 
 void reset_timer();
 

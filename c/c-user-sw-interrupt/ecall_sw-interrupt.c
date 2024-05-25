@@ -1,18 +1,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "../../bsp/encoding.h"
-#include "../../lib/sw_interrupt_lib.h"
+#include "../../bsp/user/sys_lib.h"
 
 int a = 0;
 
 void sw_interrupt_handler() {
 	a = 100;
-	disable_software_interrupt();
 }
 
 int main() {
-	enable_software_interrupt();
+	start_sw_interrupt();
 	
 	if (a == 100)
 		printf("Success!\n");

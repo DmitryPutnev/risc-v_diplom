@@ -132,6 +132,10 @@ _start:
   add sp, sp, tp
   sll a2, a0, STKSHIFT
   add tp, tp, a2
+  
+  csrr t0, mstatus
+  add t0, t0, MSTATUS_MIE
+  csrw mstatus, t0
 
   j _init
 
@@ -177,9 +181,7 @@ trap_entry:
   jal handle_trap
   csrw mepc, a0
 
-  # Remain in M-mode after eret
-  li t0, MSTATUS_MPP
-  csrs mstatus, t0
+  # Change M-mode to U-mode after mret
 
   LREG x1, 1*REGBYTES(sp)
   LREG x2, 2*REGBYTES(sp)

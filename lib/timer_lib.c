@@ -1,5 +1,5 @@
 #include "timer_lib.h"
-#include "../../bsp/encoding.h"
+#include "../bsp/encoding.h"
 
 void init_timer(int time) {
 	asm volatile (
@@ -15,16 +15,16 @@ void init_timer(int time) {
 	);
 }
 
-void enable_timer_interrupt() {
+void enable_timer() {
 	asm volatile (
 		"mv t0, %0\n"
-		"csrw mstatus, t0\n"
-		"mv t0, %1\n"
 		"csrw mie, t0\n"
-		"mv t0, %2\n"
-		"csrw mip, t0\n"
-		:: "r" (MSTATUS_MIE), "r" (1 << 7), "r" (1 << 7)
+		:: "r" (1 << 7)
 	);
+}
+
+void disable_timer() {
+	asm volatile ("csrwi mie, 0");
 }
 
 void reset_timer() {

@@ -2,19 +2,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "../../bsp/encoding.h"
-#include "../../lib/timer/timer_lib.h"
+#include "../../lib/timer_lib.h"
 
 int a = 0;
 int b = 5;
 
 // Обработчик прерывания от таймера
-uintptr_t timer_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
-	printf("Interrupt = %d\n", cause);
+void timer_handler() {
 	a++;
-	
 	reset_timer();
-	
-	return epc;
 }
 
 
@@ -23,15 +19,15 @@ int main() {
 	init_timer(0x18000);
 
 	// Включение прерываний таймера
-	enable_timer_interrupt();
+	enable_timer();
 
-	
 	// Бесконечный цикл
-	while (a < b) {
+	while (a < b)
 		printf("a = %d\n", a);
-		asm volatile ("wfi");
-	}
-
+		
+		disable_timer();
+	// Выключение прерываний таймера
 	printf("END!\n");
+	
 	return 0;
 }

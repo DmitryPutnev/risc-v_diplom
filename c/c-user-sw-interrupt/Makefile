@@ -1,7 +1,7 @@
 .PHONY: clean, dump
 
-TARGET = timer
-PRIV_LVL = machine
+TARGET = ecall_sw-interrupt
+PRIV_LVL = user
 
 PREFIX = ./../..
 
