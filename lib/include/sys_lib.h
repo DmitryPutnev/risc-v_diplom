@@ -1,5 +1,5 @@
-#ifndef SYS_NUM_H
-#define SYS_NUM_H
+#ifndef SYS_LIB_H
+#define SYS_LIB_H
 
 #define SYS_start_timer 10
 #define SYS_stop_timer 11

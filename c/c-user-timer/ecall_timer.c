@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "../../lib/timer_lib.h"
-#include "../../bsp/user/sys_lib.h"
+#include "../../lib/static_lib.h"
 
 int a = 0;
 int b = 5;

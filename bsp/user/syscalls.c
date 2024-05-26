@@ -6,9 +6,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <sys/signal.h>
-#include "sys_lib.h"
-#include "../../lib/timer_lib.h"
-#include "../../lib/sw_interrupt_lib.h"
+#include "../../lib/static_lib.h"
 
 #define SW_INTERRUPT_S 1
 #define SW_INTERRUPT_M 3

@@ -1,5 +1,5 @@
 #include "timer_lib.h"
-#include "../bsp/encoding.h"
+#include "../../bsp/encoding.h"
 
 void init_timer(int time) {
 	asm volatile (
