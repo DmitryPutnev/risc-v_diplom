@@ -12,10 +12,9 @@ void timer_handler() {
 	reset_timer();
 }
 
-
 int main() {
 	// Установка периода прерывания таймера
-	init_timer(0x18000);
+	init_timer(1000);
 
 	// Включение прерываний таймера
 	enable_timer();
@@ -24,8 +23,9 @@ int main() {
 	while (a < b)
 		printf("a = %d\n", a);
 		
-		disable_timer();
 	// Выключение прерываний таймера
+	disable_timer();
+	
 	printf("END!\n");
 	
 	return 0;

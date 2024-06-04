@@ -3,9 +3,9 @@
 .equiv mtime, 0x0200bff8
 
 .section .text
-.global _start
+.global main
 
-_start:
+m:
 	li t0, mtime
 	sw zero, 0(t0)
 	sw zero, 4(t0)
@@ -32,7 +32,7 @@ _start:
 wait:
 	bgt t1, t2, wait
 	
-	nop
+	j exit
 
 .align 4
 timer_interrupt_handler:

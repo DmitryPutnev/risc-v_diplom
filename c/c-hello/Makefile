@@ -1,11 +1,11 @@
 .PHONY: clean, dump
 
-TARGET = except
-PRIV_LVL = machine
+TARGET = hello
+PRIV_LVL = user
 
 PREFIX = ./../..
 
-SRC = $(wildcard ./*.S)
+SRC = $(wildcard ./*.c)
 
 OBJ = $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SRC)))))
 
@@ -23,7 +23,7 @@ all: $(TARGET)
 $(TARGET): $(OBJ) $(LIB)
 	$(GCC) $(LINKER_FLAGS) $(OBJ) -o $(TARGET) -L$(LIB_DIR) -l$(PRIV_LVL)
 	
-obj/%.o: %.S | obj
+obj/%.o: %.c | obj
 	$(GCC) $(COMPILER_FLAGS) -c $< -o $@
 	
 obj:
