@@ -1,5 +1,9 @@
 #include "sys_lib.h"
 
+/**
+* @brief Инициализирует период прерывани и включает прерывания от таймера
+* @param time Период прерывания
+*/
 void start_timer(int time) {
 	asm volatile (
 		"mv a7, %0\n"
@@ -9,7 +13,10 @@ void start_timer(int time) {
 	);
 }
 
-void stop_timer(int time) {
+/**
+* @brief Выключает прерывание от таймера
+*/
+void stop_timer() {
 	asm volatile (
 		"mv a7, %0\n"
 		"ecall\n"
@@ -17,6 +24,9 @@ void stop_timer(int time) {
 	);
 }
 
+/**
+* @brief Вызывает программное прерывание
+*/
 void start_sw_interrupt() {
 	asm volatile (
 		"mv a7, %0\n"

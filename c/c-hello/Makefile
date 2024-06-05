@@ -1,7 +1,7 @@
 .PHONY: clean, dump
 
 TARGET = hello
-PRIV_LVL = user
+PRIV_LVL = machine
 
 PREFIX = ./../..
 

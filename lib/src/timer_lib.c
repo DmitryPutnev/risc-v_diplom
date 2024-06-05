@@ -1,6 +1,10 @@
 #include "timer_lib.h"
 #include "../../bsp/encoding.h"
 
+/**
+* @brief Инициализирует период прерывание
+* @param time Период прерывания
+*/
 void init_timer(int time) {
 	asm volatile (
 		"mv t0, %0\n"
@@ -15,6 +19,9 @@ void init_timer(int time) {
 	);
 }
 
+/**
+* @brief Включает прерывание от таймера
+*/
 void enable_timer() {
 	asm volatile (
 		"mv t0, %0\n"
@@ -23,10 +30,16 @@ void enable_timer() {
 	);
 }
 
+/**
+* @brief Выключает прерывание от таймера
+*/
 void disable_timer() {
 	asm volatile ("csrwi mie, 0");
 }
 
+/**
+* @brief Сбрасывает счетчик таймера
+*/
 void reset_timer() {
 	asm volatile (
 		"mv t0, %0\n"

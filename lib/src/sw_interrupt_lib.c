@@ -1,6 +1,9 @@
 #include "sw_interrupt_lib.h"
 #include "../../bsp/encoding.h"
 
+/**
+* @brief Вызывает программное прерывание
+*/
 void enable_software_interrupt() {
 	asm volatile (
 		"mv t0, %0\n"
@@ -11,6 +14,9 @@ void enable_software_interrupt() {
 	);
 }
 
+/**
+* @brief Выключает программное прерывание
+*/
 void disable_software_interrupt() {
 	asm volatile (
 		"csrwi mie, 0\n"

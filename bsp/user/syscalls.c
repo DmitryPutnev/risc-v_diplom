@@ -1,5 +1,3 @@
-// See LICENSE for license details.
-
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
@@ -67,22 +65,37 @@ void __attribute__((noreturn)) tohost_exit(uintptr_t code)
   while (1);
 }
 
+/**
+* @brief Обработчик перываний от таймера
+*/
 void __attribute__((weak)) timer_handler() {
   printf("Timer interrupt\n");
   tohost_exit(1);
 }
 
+/**
+* @brief Обработчик внешних перываний
+*/
 void __attribute__((weak)) external_interrupt_handler() {
   printf("External_interrupt\n");
   tohost_exit(1);
 }
 
+/**
+* @brief Обработчик программных перываний
+*/
 void __attribute__((weak)) sw_interrupt_handler() {
   printf("Software interrupt\n");
   tohost_exit(1);
 }
 
-
+/**
+* @brief Обработчик системных вызовов
+* @param cause причина возникновения особой ситуации
+* @param epc адрес последней операции основной программы
+* @param regs регистры общего назначения
+* @return адрес возврата
+*/
 uintptr_t __attribute__((weak)) ecall_handler(uintptr_t cause, uintptr_t epc, uintptr_t regs[32]) {
   switch ((int)regs[17]) {
   	case SYS_start_timer:
@@ -99,6 +112,13 @@ uintptr_t __attribute__((weak)) ecall_handler(uintptr_t cause, uintptr_t epc, ui
   return epc+4;
 }
 
+/**
+* @brief Обработчик особых ситуаций
+* @param cause причина возникновения особой ситуации
+* @param epc адрес последней операции основной программы
+* @param regs регистры общего назначения
+* @return адрес возврата
+*/
 uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uintptr_t regs[32])
 {
   int64_t interrupt;
@@ -155,6 +175,10 @@ uintptr_t __attribute__((weak)) handle_trap(uintptr_t cause, uintptr_t epc, uint
   }
 }
 
+/**
+* @brief Завершение программы с определенным кодом
+* @param code код завершения программы
+*/
 void exit(int code)
 {
   tohost_exit(code);
@@ -170,6 +194,11 @@ void printstr(const char* s)
   syscall(SYS_write, 1, (uintptr_t)s, strlen(s));
 }
 
+/**
+* @brief Обработчик потоков
+* @param cid номер текщего потока
+* @param nc кол-во потоков
+*/
 void __attribute__((weak)) thread_entry(int cid, int nc)
 {
   // multi-threaded programs override this function.
@@ -177,6 +206,11 @@ void __attribute__((weak)) thread_entry(int cid, int nc)
   while (cid != 0);
 }
 
+/**
+* @brief Функция, содержащая код основной программы
+* @param argc кол-во аргументов командной строки
+* @param argv массив значений аргументов
+*/
 int __attribute__((weak)) main(int argc, char** argv)
 {
   // single-threaded programs override this function.
@@ -194,6 +228,9 @@ static void init_tls()
   memset(thread_pointer + tdata_size, 0, tbss_size);
 }
 
+/**
+* @brief Вход в функцию main
+*/
 void enter_main() 
 {  
   // only single-threaded programs should ever get here.
@@ -210,6 +247,11 @@ void enter_main()
   exit(ret);
 }
 
+/**
+* @brief Функция запуска программы и переход в пользовательский режим
+* @param cid номер текщего потока
+* @param nc кол-во потоков
+*/
 void _init(int cid, int nc)
 {
   init_tls();
