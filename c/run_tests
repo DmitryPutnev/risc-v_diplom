@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Проходим по всем поддиректориям
+for dir in */; do
+	if [ -d "$dir" ]; then
+		cd "$dir" || exit 1 # Переходим в поддиректорию
+		for script in ./*.sh; do
+			if [ -f "$script" ]; then
+				echo "Running $script in $dir"
+				bash "$script"
+			fi
+		done
+		cd .. # Возвращаемся в родительскую директорию
+	fi
+done
